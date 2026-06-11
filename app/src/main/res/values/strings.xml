@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">قصه‌های کودک</string>
+    <string name="btn_read">بخوان</string>
+    <string name="btn_listen">گوش بده</string>
+    <string name="btn_restart">شروع از اول</string>
+    <string name="settings_title">تنظیمات</string>
+    <string name="font_size_label">اندازه قلم</string>
+    <string name="speed_label">سرعت صدا</string>
+</resources>
