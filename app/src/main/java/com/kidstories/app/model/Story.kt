@@ -2,7 +2,9 @@ package com.kidstories.app.model
 
 data class Page(
     val pageNumber: Int,
-    val text: String
+    val text: String,
+    val image: String? = null,
+    val imagePath: String? = null
 )
 
 data class Story(
