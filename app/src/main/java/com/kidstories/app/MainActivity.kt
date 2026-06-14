@@ -32,19 +32,24 @@ class MainActivity : ComponentActivity() {
 
     private fun copyBundledStoriesIfNeeded(storiesDir: File) {
         val prefs = getSharedPreferences("app_state", MODE_PRIVATE)
-        if (prefs.getBoolean("stories_copied", false)) return
+        if (prefs.getBoolean("stories_copied_v3", false)) return
 
-        assets.list("stories")?.forEach { storyFolder ->
-            val destDir = File(storiesDir, storyFolder).also { it.mkdirs() }
-            assets.list("stories/$storyFolder")?.forEach { fileName ->
-                val destFile = File(destDir, fileName)
-                if (!destFile.exists()) {
-                    assets.open("stories/$storyFolder/$fileName").use { input ->
-                        destFile.outputStream().use { output -> input.copyTo(output) }
-                    }
-                }
+        copyAssetDir("stories", storiesDir)
+        prefs.edit().putBoolean("stories_copied_v3", true).apply()
+    }
+
+    private fun copyAssetDir(assetPath: String, destDir: File) {
+        destDir.mkdirs()
+        assets.list(assetPath)?.forEach { name ->
+            val childAsset = "$assetPath/$name"
+            val childDest = File(destDir, name)
+            val children = assets.list(childAsset)
+            if (children != null && children.isNotEmpty()) {
+                copyAssetDir(childAsset, childDest)
+            } else if (!childDest.exists() || name.endsWith(".json") || name == "cover.png") {
+                childDest.delete()
+                assets.open(childAsset).use { it.copyTo(childDest.outputStream()) }
             }
         }
-        prefs.edit().putBoolean("stories_copied", true).apply()
     }
 }

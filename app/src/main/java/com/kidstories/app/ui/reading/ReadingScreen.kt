@@ -64,9 +64,8 @@ fun ReadingScreen(story: Story, progressRepository: ProgressRepository, onBack: 
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp)
                         .clip(RoundedCornerShape(12.dp)),
-                    contentScale = ContentScale.Crop
+                    contentScale = ContentScale.FillWidth
                 )
                 Spacer(modifier = Modifier.height(12.dp))
             }
@@ -81,21 +80,28 @@ fun ReadingScreen(story: Story, progressRepository: ProgressRepository, onBack: 
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(
-                    onClick = {
-                        progressRepository.resetProgress(story.id)
-                        currentPage = 1
+                if (currentPage > 1) {
+                    OutlinedButton(onClick = { currentPage-- }) { Text("قبلی") }
+                } else {
+                    TextButton(
+                        onClick = {
+                            progressRepository.resetProgress(story.id)
+                            currentPage = 1
+                        }
+                    ) {
+                        Text(stringResource(R.string.btn_restart))
                     }
-                ) {
-                    Text(stringResource(R.string.btn_restart))
                 }
-                Row {
-                    if (currentPage > 1) {
-                        OutlinedButton(onClick = { currentPage-- }) { Text("قبلی") }
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-                    if (currentPage < totalPages) {
-                        Button(onClick = { currentPage++ }) { Text("بعدی") }
+                if (currentPage < totalPages) {
+                    Button(onClick = { currentPage++ }) { Text("بعدی") }
+                } else {
+                    TextButton(
+                        onClick = {
+                            progressRepository.resetProgress(story.id)
+                            currentPage = 1
+                        }
+                    ) {
+                        Text(stringResource(R.string.btn_restart))
                     }
                 }
             }
