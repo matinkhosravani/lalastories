@@ -1,11 +1,15 @@
 package com.kidstories.app.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.adivery.sdk.Adivery
+import com.adivery.sdk.AdiveryListener
 import com.kidstories.app.repository.ProgressRepository
 import com.kidstories.app.repository.StoryRepository
 import com.kidstories.app.ui.detail.StoryDetailScreen
@@ -13,6 +17,8 @@ import com.kidstories.app.ui.home.HomeScreen
 import com.kidstories.app.ui.listening.ListeningScreen
 import com.kidstories.app.ui.reading.ReadingScreen
 import com.kidstories.app.ui.settings.SettingsScreen
+
+private const val INTERSTITIAL_PLACEMENT_ID = "e3d7931e-195b-4ee7-b621-e3b1dbd0a569"
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -31,11 +37,27 @@ sealed class Screen(val route: String) {
 @Composable
 fun AppNavigation(storyRepository: StoryRepository, progressRepository: ProgressRepository) {
     val navController = rememberNavController()
+    val context = LocalContext.current
     NavHost(navController = navController, startDestination = Screen.Home.route) {
         composable(Screen.Home.route) {
+            LaunchedEffect(Unit) {
+                Adivery.prepareInterstitialAd(context, INTERSTITIAL_PLACEMENT_ID)
+            }
             HomeScreen(
                 stories = storyRepository.loadStories(),
-                onStoryClick = { navController.navigate(Screen.Detail.createRoute(it.id)) },
+                onStoryClick = { story ->
+                    if (Adivery.isLoaded(INTERSTITIAL_PLACEMENT_ID)) {
+                        Adivery.addPlacementListener(INTERSTITIAL_PLACEMENT_ID, object : AdiveryListener() {
+                            override fun onInterstitialAdClosed(placementId: String) {
+                                Adivery.removePlacementListener(INTERSTITIAL_PLACEMENT_ID)
+                                navController.navigate(Screen.Detail.createRoute(story.id))
+                            }
+                        })
+                        Adivery.showAd(INTERSTITIAL_PLACEMENT_ID)
+                    } else {
+                        navController.navigate(Screen.Detail.createRoute(story.id))
+                    }
+                },
                 onSettingsClick = { navController.navigate(Screen.Settings.route) }
             )
         }

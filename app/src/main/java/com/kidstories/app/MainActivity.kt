@@ -3,6 +3,7 @@ package com.kidstories.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import com.adivery.sdk.Adivery
 import com.kidstories.app.navigation.AppNavigation
 import com.kidstories.app.repository.ProgressRepository
 import com.kidstories.app.repository.StoryRepository
@@ -13,6 +14,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Adivery.configure(application, "2c1809b1-b6e4-4305-8757-847a73410a18")
 
         val storiesDir = File(getExternalFilesDir(null), "stories")
         copyBundledStoriesIfNeeded(storiesDir)
@@ -32,10 +34,10 @@ class MainActivity : ComponentActivity() {
 
     private fun copyBundledStoriesIfNeeded(storiesDir: File) {
         val prefs = getSharedPreferences("app_state", MODE_PRIVATE)
-        if (prefs.getBoolean("stories_copied_v3", false)) return
+        if (prefs.getBoolean("stories_copied_v5", false)) return
 
         copyAssetDir("stories", storiesDir)
-        prefs.edit().putBoolean("stories_copied_v3", true).apply()
+        prefs.edit().putBoolean("stories_copied_v5", true).apply()
     }
 
     private fun copyAssetDir(assetPath: String, destDir: File) {

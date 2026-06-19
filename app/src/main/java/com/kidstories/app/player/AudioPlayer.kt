@@ -30,6 +30,16 @@ class AudioPlayer {
 
     fun getCurrentPositionMs(): Long = mediaPlayer?.currentPosition?.toLong() ?: 0L
 
+    fun getDurationMs(): Long = mediaPlayer?.duration?.toLong() ?: 0L
+
+    fun seekTo(positionMs: Long) {
+        mediaPlayer?.seekTo(positionMs.toInt())
+    }
+
+    fun setOnCompletionListener(listener: () -> Unit) {
+        mediaPlayer?.setOnCompletionListener { listener() }
+    }
+
     fun release() {
         mediaPlayer?.release()
         mediaPlayer = null

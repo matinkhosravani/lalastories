@@ -22,7 +22,7 @@ class StoryRepository(private val storiesDir: File) {
             val raw = gson.fromJson(jsonFile.readText(), Story::class.java)
             raw.copy(
                 coverPath = File(dir, "cover.png").takeIf { it.exists() }?.absolutePath,
-                audioPath = File(dir, "audio.mp3").takeIf { it.exists() }?.absolutePath,
+                audioPath = File(dir, "voice.mp3").takeIf { it.exists() }?.absolutePath,
                 pages = raw.pages.map { page ->
                     page.copy(
                         imagePath = page.image?.let { File(dir, it).takeIf { f -> f.exists() }?.absolutePath }

@@ -11,12 +11,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.kidstories.app.R
 import com.kidstories.app.model.Story
+
+private val ReadButtonColor = Color(0xFFFF6B35)
+private val ListenButtonColor = Color(0xFF7C4DFF)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -74,16 +79,32 @@ fun StoryDetailScreen(story: Story, onReadClick: () -> Unit, onListenClick: () -
             Spacer(modifier = Modifier.weight(1f))
             Button(
                 onClick = onReadClick,
-                modifier = Modifier.fillMaxWidth().height(56.dp)
+                modifier = Modifier.fillMaxWidth().height(60.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = ReadButtonColor)
             ) {
-                Text(stringResource(R.string.btn_read), style = MaterialTheme.typography.titleMedium)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("📖", style = MaterialTheme.typography.titleMedium.copy(fontFamily = FontFamily.Default))
+                    Text(stringResource(R.string.btn_read), style = MaterialTheme.typography.titleMedium)
+                }
             }
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedButton(
+            Button(
                 onClick = onListenClick,
-                modifier = Modifier.fillMaxWidth().height(56.dp)
+                modifier = Modifier.fillMaxWidth().height(60.dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = ListenButtonColor)
             ) {
-                Text(stringResource(R.string.btn_listen), style = MaterialTheme.typography.titleMedium)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("🎵", style = MaterialTheme.typography.titleMedium.copy(fontFamily = FontFamily.Default))
+                    Text(stringResource(R.string.btn_listen), style = MaterialTheme.typography.titleMedium)
+                }
             }
         }
     }

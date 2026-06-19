@@ -19,13 +19,25 @@ private val BKoodak = FontFamily(
 )
 
 private val KidColorScheme = lightColorScheme(
-    primary = Color(0xFFFF6B6B),
-    secondary = Color(0xFF4ECDC4),
-    tertiary = Color(0xFFFFE66D),
-    background = Color(0xFFFFF9F0),
-    surface = Color(0xFFFFFFFF),
+    primary = Color(0xFFFF6B35),
     onPrimary = Color.White,
-    onBackground = Color(0xFF2D2D2D)
+    primaryContainer = Color(0xFFFFE0CC),
+    onPrimaryContainer = Color(0xFF5C1500),
+    secondary = Color(0xFF7C4DFF),
+    onSecondary = Color.White,
+    secondaryContainer = Color(0xFFEDE7FF),
+    onSecondaryContainer = Color(0xFF21005D),
+    tertiary = Color(0xFF00BFA5),
+    onTertiary = Color.White,
+    tertiaryContainer = Color(0xFFB2EFE8),
+    background = Color(0xFFFFF9E6),
+    onBackground = Color(0xFF1A1A2E),
+    surface = Color(0xFFFFFFFF),
+    onSurface = Color(0xFF1A1A2E),
+    surfaceVariant = Color(0xFFF3EFF4),
+    onSurfaceVariant = Color(0xFF49454F),
+    error = Color(0xFFFF3B30),
+    onError = Color.White,
 )
 
 private val KidTypography = Typography(
