@@ -1,0 +1,9 @@
+keystore.properties
+app/lalastories-release.jks
+.gradle/
+app/build/
+build/
+local.properties
+*.iml
+.idea/
+.DS_Store
