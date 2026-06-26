@@ -93,6 +93,9 @@ dependencies {
     implementation 'io.coil-kt:coil-compose:2.5.0'
     implementation 'com.google.code.gson:gson:2.10.1'
     implementation 'com.adivery:sdk:4.8.8'
+    implementation 'io.adtrace:android-sdk:2.6.0'
+    implementation 'com.android.installreferrer:installreferrer:2.2'
+    implementation 'com.google.android.gms:play-services-ads-identifier:18.0.0'
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.robolectric:robolectric:4.11.1'
