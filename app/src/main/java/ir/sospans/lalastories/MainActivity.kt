@@ -34,10 +34,10 @@ class MainActivity : ComponentActivity() {
 
     private fun copyBundledStoriesIfNeeded(storiesDir: File) {
         val prefs = getSharedPreferences("app_state", MODE_PRIVATE)
-        if (prefs.getBoolean("stories_copied_v14", false)) return
+        if (prefs.getBoolean("stories_copied_v15", false)) return
 
         copyAssetDir("stories", storiesDir)
-        prefs.edit().putBoolean("stories_copied_v14", true).apply()
+        prefs.edit().putBoolean("stories_copied_v15", true).apply()
     }
 
     private fun copyAssetDir(assetPath: String, destDir: File) {
