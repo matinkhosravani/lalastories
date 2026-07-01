@@ -2,6 +2,7 @@ package ir.sospans.lalastories.ui.home
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
@@ -21,11 +22,17 @@ import ir.sospans.lalastories.model.Story
 private sealed class HomeGridItem {
     data class StoryItem(val story: Story) : HomeGridItem()
     object Ad : HomeGridItem()
+    object PoemsEntry : HomeGridItem()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(stories: List<Story>, onStoryClick: (Story) -> Unit, onSettingsClick: () -> Unit) {
+fun HomeScreen(
+    stories: List<Story>,
+    onStoryClick: (Story) -> Unit,
+    onSettingsClick: () -> Unit,
+    onPoemsClick: () -> Unit
+) {
     var showAd by remember { mutableStateOf(true) }
 
     val gridItems: List<HomeGridItem> = buildList {
@@ -34,6 +41,7 @@ fun HomeScreen(stories: List<Story>, onStoryClick: (Story) -> Unit, onSettingsCl
             add(HomeGridItem.StoryItem(story))
         }
         if (stories.size <= 2 && showAd) add(HomeGridItem.Ad)
+        add(HomeGridItem.PoemsEntry)
     }
 
     Scaffold(
@@ -61,7 +69,11 @@ fun HomeScreen(stories: List<Story>, onStoryClick: (Story) -> Unit, onSettingsCl
                     when (item) {
                         is HomeGridItem.StoryItem -> item.story.id
                         is HomeGridItem.Ad -> "native_ad"
+                        is HomeGridItem.PoemsEntry -> "poems_entry"
                     }
+                },
+                span = { item ->
+                    if (item is HomeGridItem.PoemsEntry) GridItemSpan(maxLineSpan) else GridItemSpan(1)
                 }
             ) { item ->
                 when (item) {
@@ -70,6 +82,7 @@ fun HomeScreen(stories: List<Story>, onStoryClick: (Story) -> Unit, onSettingsCl
                         onClick = { onStoryClick(item.story) }
                     )
                     is HomeGridItem.Ad -> NativeAdCard(onNoAd = { showAd = false })
+                    is HomeGridItem.PoemsEntry -> PoemsEntryCard(onClick = onPoemsClick)
                 }
             }
         }
