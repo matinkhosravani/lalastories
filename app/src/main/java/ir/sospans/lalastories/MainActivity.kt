@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.adivery.sdk.Adivery
 import ir.sospans.lalastories.navigation.AppNavigation
+import ir.sospans.lalastories.repository.PoemRepository
 import ir.sospans.lalastories.repository.ProgressRepository
 import ir.sospans.lalastories.repository.StoryRepository
 import ir.sospans.lalastories.ui.theme.KidStoriesTheme
@@ -19,13 +20,18 @@ class MainActivity : ComponentActivity() {
         val storiesDir = File(getExternalFilesDir(null), "stories")
         copyBundledStoriesIfNeeded(storiesDir)
 
+        val poemsDir = File(getExternalFilesDir(null), "poems")
+        copyBundledPoemsIfNeeded(poemsDir)
+
         val storyRepository = StoryRepository(storiesDir)
+        val poemRepository = PoemRepository(poemsDir)
         val progressRepository = ProgressRepository(this)
 
         setContent {
             KidStoriesTheme {
                 AppNavigation(
                     storyRepository = storyRepository,
+                    poemRepository = poemRepository,
                     progressRepository = progressRepository
                 )
             }
@@ -38,6 +44,14 @@ class MainActivity : ComponentActivity() {
 
         copyAssetDir("stories", storiesDir)
         prefs.edit().putBoolean("stories_copied_v15", true).apply()
+    }
+
+    private fun copyBundledPoemsIfNeeded(poemsDir: File) {
+        val prefs = getSharedPreferences("app_state", MODE_PRIVATE)
+        if (prefs.getBoolean("poems_copied_v1", false)) return
+
+        copyAssetDir("poems", poemsDir)
+        prefs.edit().putBoolean("poems_copied_v1", true).apply()
     }
 
     private fun copyAssetDir(assetPath: String, destDir: File) {

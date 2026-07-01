@@ -10,11 +10,13 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.adivery.sdk.Adivery
 import com.adivery.sdk.AdiveryListener
+import ir.sospans.lalastories.repository.PoemRepository
 import ir.sospans.lalastories.repository.ProgressRepository
 import ir.sospans.lalastories.repository.StoryRepository
 import ir.sospans.lalastories.ui.detail.StoryDetailScreen
 import ir.sospans.lalastories.ui.home.HomeScreen
 import ir.sospans.lalastories.ui.listening.ListeningScreen
+import ir.sospans.lalastories.ui.poems.PoemsScreen
 import ir.sospans.lalastories.ui.reading.ReadingScreen
 import ir.sospans.lalastories.ui.settings.SettingsScreen
 
@@ -32,10 +34,15 @@ sealed class Screen(val route: String) {
         fun createRoute(storyId: String) = "listening/$storyId"
     }
     object Settings : Screen("settings")
+    object Poems : Screen("poems")
 }
 
 @Composable
-fun AppNavigation(storyRepository: StoryRepository, progressRepository: ProgressRepository) {
+fun AppNavigation(
+    storyRepository: StoryRepository,
+    poemRepository: PoemRepository,
+    progressRepository: ProgressRepository
+) {
     val navController = rememberNavController()
     val context = LocalContext.current
     NavHost(navController = navController, startDestination = Screen.Home.route) {
@@ -58,7 +65,8 @@ fun AppNavigation(storyRepository: StoryRepository, progressRepository: Progress
                         navController.navigate(Screen.Detail.createRoute(story.id))
                     }
                 },
-                onSettingsClick = { navController.navigate(Screen.Settings.route) }
+                onSettingsClick = { navController.navigate(Screen.Settings.route) },
+                onPoemsClick = { navController.navigate(Screen.Poems.route) }
             )
         }
         composable(
@@ -100,6 +108,12 @@ fun AppNavigation(storyRepository: StoryRepository, progressRepository: Progress
         }
         composable(Screen.Settings.route) {
             SettingsScreen(onBack = { navController.popBackStack() })
+        }
+        composable(Screen.Poems.route) {
+            PoemsScreen(
+                poemRepository = poemRepository,
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }
