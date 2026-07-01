@@ -19,11 +19,13 @@ import ir.sospans.lalastories.ui.listening.ListeningScreen
 import ir.sospans.lalastories.ui.poems.PoemsScreen
 import ir.sospans.lalastories.ui.reading.ReadingScreen
 import ir.sospans.lalastories.ui.settings.SettingsScreen
+import ir.sospans.lalastories.ui.stories.StoriesScreen
 
 private const val INTERSTITIAL_PLACEMENT_ID = "e3d7931e-195b-4ee7-b621-e3b1dbd0a569"
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
+    object Stories : Screen("stories")
     object Detail : Screen("detail/{storyId}") {
         fun createRoute(storyId: String) = "detail/$storyId"
     }
@@ -47,10 +49,17 @@ fun AppNavigation(
     val context = LocalContext.current
     NavHost(navController = navController, startDestination = Screen.Home.route) {
         composable(Screen.Home.route) {
+            HomeScreen(
+                onStoriesClick = { navController.navigate(Screen.Stories.route) },
+                onPoemsClick = { navController.navigate(Screen.Poems.route) },
+                onSettingsClick = { navController.navigate(Screen.Settings.route) }
+            )
+        }
+        composable(Screen.Stories.route) {
             LaunchedEffect(Unit) {
                 Adivery.prepareInterstitialAd(context, INTERSTITIAL_PLACEMENT_ID)
             }
-            HomeScreen(
+            StoriesScreen(
                 stories = storyRepository.loadStories(),
                 onStoryClick = { story ->
                     if (Adivery.isLoaded(INTERSTITIAL_PLACEMENT_ID)) {
@@ -65,8 +74,7 @@ fun AppNavigation(
                         navController.navigate(Screen.Detail.createRoute(story.id))
                     }
                 },
-                onSettingsClick = { navController.navigate(Screen.Settings.route) },
-                onPoemsClick = { navController.navigate(Screen.Poems.route) }
+                onBack = { navController.popBackStack() }
             )
         }
         composable(
