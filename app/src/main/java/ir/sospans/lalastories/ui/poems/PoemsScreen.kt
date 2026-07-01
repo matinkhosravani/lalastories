@@ -1,5 +1,6 @@
 package ir.sospans.lalastories.ui.poems
 
+import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -16,15 +17,24 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
 import coil.compose.AsyncImage
+import com.adivery.sdk.Adivery
+import com.adivery.sdk.AdiveryBannerAdView
+import com.adivery.sdk.BannerSize
 import ir.sospans.lalastories.R
 import ir.sospans.lalastories.model.Poem
 import ir.sospans.lalastories.repository.PoemRepository
+
+private const val BANNER_PLACEMENT_ID = "aa78c7e1-292a-40fa-973a-6abb2fa7e6db"
+private const val INTERSTITIAL_PLACEMENT_ID = "e3d7931e-195b-4ee7-b621-e3b1dbd0a569"
+private const val NAV_COUNT_FOR_INTERSTITIAL = 4
 
 private val PoemGradients = listOf(
     listOf(Color(0xFFFF6B35), Color(0xFFFFB199)),
@@ -35,8 +45,26 @@ private val PoemGradients = listOf(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PoemsScreen(poemRepository: PoemRepository, onBack: () -> Unit) {
+    val context = LocalContext.current
     val poems = remember { poemRepository.loadPoems().shuffled() }
     var currentIndex by remember { mutableIntStateOf(0) }
+    var navigationCount by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        Adivery.prepareInterstitialAd(context, INTERSTITIAL_PLACEMENT_ID)
+    }
+
+    fun onNavigate(newIndex: Int) {
+        currentIndex = newIndex
+        navigationCount++
+        if (navigationCount >= NAV_COUNT_FOR_INTERSTITIAL) {
+            navigationCount = 0
+            if (Adivery.isLoaded(INTERSTITIAL_PLACEMENT_ID)) {
+                Adivery.showAd(INTERSTITIAL_PLACEMENT_ID)
+                Adivery.prepareInterstitialAd(context, INTERSTITIAL_PLACEMENT_ID)
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -88,16 +116,32 @@ fun PoemsScreen(poemRepository: PoemRepository, onBack: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Button(onClick = { currentIndex = (currentIndex + 1) % poems.size }) {
+                Button(onClick = { onNavigate((currentIndex + 1) % poems.size) }) {
                     Text("بعدی")
                 }
                 OutlinedButton(
-                    onClick = { currentIndex = (currentIndex - 1 + poems.size) % poems.size },
+                    onClick = { onNavigate((currentIndex - 1 + poems.size) % poems.size) },
                     colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
                 ) {
                     Text("قبلی")
                 }
             }
+
+            Spacer(modifier = Modifier.height(4.dp))
+            AndroidView(
+                factory = { ctx ->
+                    AdiveryBannerAdView(ctx).apply {
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        )
+                        setPlacementId(BANNER_PLACEMENT_ID)
+                        setBannerSize(BannerSize.BANNER)
+                        loadAd()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     }
 }
