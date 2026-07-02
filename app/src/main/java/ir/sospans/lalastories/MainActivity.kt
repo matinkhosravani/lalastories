@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.adivery.sdk.Adivery
 import ir.sospans.lalastories.navigation.AppNavigation
+import ir.sospans.lalastories.repository.LullabyRepository
 import ir.sospans.lalastories.repository.PoemRepository
 import ir.sospans.lalastories.repository.ProgressRepository
 import ir.sospans.lalastories.repository.StoryRepository
@@ -33,8 +34,12 @@ class MainActivity : ComponentActivity() {
         val poemsDir = File(getExternalFilesDir(null), "poems")
         copyBundledPoemsIfNeeded(poemsDir)
 
+        val lullabiesDir = File(getExternalFilesDir(null), "lullabies")
+        copyBundledLullabiesIfNeeded(lullabiesDir)
+
         val storyRepository = StoryRepository(storiesDir)
         val poemRepository = PoemRepository(poemsDir)
+        val lullabyRepository = LullabyRepository(lullabiesDir)
         val progressRepository = ProgressRepository(this)
 
         setContent {
@@ -42,6 +47,7 @@ class MainActivity : ComponentActivity() {
                 AppNavigation(
                     storyRepository = storyRepository,
                     poemRepository = poemRepository,
+                    lullabyRepository = lullabyRepository,
                     progressRepository = progressRepository
                 )
             }
@@ -63,6 +69,15 @@ class MainActivity : ComponentActivity() {
         poemsDir.deleteRecursively()
         copyAssetDir("poems", poemsDir)
         prefs.edit().putBoolean("poems_copied_v2", true).apply()
+    }
+
+    private fun copyBundledLullabiesIfNeeded(lullabiesDir: File) {
+        val prefs = getSharedPreferences("app_state", MODE_PRIVATE)
+        if (prefs.getBoolean("lullabies_copied_v1", false)) return
+
+        lullabiesDir.deleteRecursively()
+        copyAssetDir("lullabies", lullabiesDir)
+        prefs.edit().putBoolean("lullabies_copied_v1", true).apply()
     }
 
     private fun copyAssetDir(assetPath: String, destDir: File) {
