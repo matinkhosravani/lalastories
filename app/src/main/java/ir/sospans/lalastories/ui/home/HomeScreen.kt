@@ -48,6 +48,22 @@ fun HomeScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            AndroidView(
+                factory = { ctx ->
+                    AdiveryBannerAdView(ctx).apply {
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
+                        )
+                        setPlacementId(BANNER_PLACEMENT_ID)
+                        setBannerSize(BannerSize.SMART_BANNER)
+                        loadAd()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
     ) { padding ->
         Column(
@@ -88,21 +104,6 @@ fun HomeScreen(
             }
 
             Spacer(modifier = Modifier.height(12.dp))
-
-            AndroidView(
-                factory = { ctx ->
-                    AdiveryBannerAdView(ctx).apply {
-                        layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
-                        )
-                        setPlacementId(BANNER_PLACEMENT_ID)
-                        setBannerSize(BannerSize.SMART_BANNER)
-                        loadAd()
-                    }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
 }
