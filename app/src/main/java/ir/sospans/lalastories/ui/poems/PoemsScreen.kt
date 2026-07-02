@@ -166,7 +166,7 @@ private fun PoemCardContent(poem: Poem, modifier: Modifier = Modifier) {
                     contentDescription = poem.title,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(160.dp)
+                        .height(240.dp)
                         .clip(RoundedCornerShape(16.dp)),
                     contentScale = ContentScale.Crop
                 )
@@ -174,7 +174,7 @@ private fun PoemCardContent(poem: Poem, modifier: Modifier = Modifier) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(160.dp)
+                        .height(240.dp)
                         .clip(RoundedCornerShape(16.dp))
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
