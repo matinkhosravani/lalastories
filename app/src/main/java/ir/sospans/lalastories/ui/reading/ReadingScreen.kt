@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -23,7 +24,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.runtime.CompositionLocalProvider
 import coil.compose.AsyncImage
+import com.adivery.sdk.Adivery
 import com.adivery.sdk.AdiveryBannerAdView
+import com.adivery.sdk.AdiveryListener
 import com.adivery.sdk.BannerSize
 import ir.sospans.lalastories.R
 import ir.sospans.lalastories.model.Story
@@ -31,14 +34,36 @@ import ir.sospans.lalastories.model.StoryProgress
 import ir.sospans.lalastories.repository.ProgressRepository
 
 private const val BANNER_PLACEMENT_ID = "aa78c7e1-292a-40fa-973a-6abb2fa7e6db"
+private const val INTERSTITIAL_PLACEMENT_ID = "e3d7931e-195b-4ee7-b621-e3b1dbd0a569"
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
 fun ReadingScreen(story: Story, progressRepository: ProgressRepository, onBack: () -> Unit) {
+    val context = LocalContext.current
     val savedProgress = remember { progressRepository.getProgress(story.id) }
     var currentPage by remember { mutableIntStateOf(savedProgress.lastPage) }
     var goingForward by remember { mutableStateOf(true) }
     val totalPages = story.pages.size
+
+    LaunchedEffect(Unit) {
+        Adivery.prepareInterstitialAd(context, INTERSTITIAL_PLACEMENT_ID)
+    }
+
+    fun goToNextPage() {
+        if (currentPage == 1 && Adivery.isLoaded(INTERSTITIAL_PLACEMENT_ID)) {
+            Adivery.addPlacementListener(INTERSTITIAL_PLACEMENT_ID, object : AdiveryListener() {
+                override fun onInterstitialAdClosed(placementId: String) {
+                    Adivery.removePlacementListener(INTERSTITIAL_PLACEMENT_ID)
+                    goingForward = true
+                    currentPage++
+                }
+            })
+            Adivery.showAd(INTERSTITIAL_PLACEMENT_ID)
+        } else {
+            goingForward = true
+            currentPage++
+        }
+    }
 
     DisposableEffect(currentPage) {
         onDispose {
@@ -91,11 +116,11 @@ fun ReadingScreen(story: Story, progressRepository: ProgressRepository, onBack: 
                 targetState = currentPage,
                 transitionSpec = {
                     if (goingForward) {
-                        (slideInHorizontally(tween(350)) { -it } + fadeIn(tween(350))) togetherWith
-                                (slideOutHorizontally(tween(350)) { it } + fadeOut(tween(350)))
-                    } else {
                         (slideInHorizontally(tween(350)) { it } + fadeIn(tween(350))) togetherWith
                                 (slideOutHorizontally(tween(350)) { -it } + fadeOut(tween(350)))
+                    } else {
+                        (slideInHorizontally(tween(350)) { -it } + fadeIn(tween(350))) togetherWith
+                                (slideOutHorizontally(tween(350)) { it } + fadeOut(tween(350)))
                     }
                 },
                 modifier = Modifier
@@ -104,8 +129,7 @@ fun ReadingScreen(story: Story, progressRepository: ProgressRepository, onBack: 
                         detectHorizontalDragGestures(
                             onDragEnd = {
                                 if (dragTotal < -80 && currentPage < totalPages) {
-                                    goingForward = true
-                                    currentPage++
+                                    goToNextPage()
                                 } else if (dragTotal > 80 && currentPage > 1) {
                                     goingForward = false
                                     currentPage--
@@ -147,10 +171,7 @@ fun ReadingScreen(story: Story, progressRepository: ProgressRepository, onBack: 
             ) {
                 // Right side in RTL (first child = start = right)
                 if (currentPage < totalPages) {
-                    Button(onClick = {
-                        goingForward = true
-                        currentPage++
-                    }) { Text("بعدی →") }
+                    Button(onClick = { goToNextPage() }) { Text("بعدی →") }
                 } else {
                     TextButton(
                         onClick = {

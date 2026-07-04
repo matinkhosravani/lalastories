@@ -65,23 +65,10 @@ fun AppNavigation(
             )
         }
         composable(Screen.Stories.route) {
-            LaunchedEffect(Unit) {
-                Adivery.prepareInterstitialAd(context, INTERSTITIAL_PLACEMENT_ID)
-            }
             StoriesScreen(
                 stories = storyRepository.loadStories(),
                 onStoryClick = { story ->
-                    if (Adivery.isLoaded(INTERSTITIAL_PLACEMENT_ID)) {
-                        Adivery.addPlacementListener(INTERSTITIAL_PLACEMENT_ID, object : AdiveryListener() {
-                            override fun onInterstitialAdClosed(placementId: String) {
-                                Adivery.removePlacementListener(INTERSTITIAL_PLACEMENT_ID)
-                                navController.navigate(Screen.Detail.createRoute(story.id))
-                            }
-                        })
-                        Adivery.showAd(INTERSTITIAL_PLACEMENT_ID)
-                    } else {
-                        navController.navigate(Screen.Detail.createRoute(story.id))
-                    }
+                    navController.navigate(Screen.Detail.createRoute(story.id))
                 },
                 onBack = { navController.popBackStack() }
             )
