@@ -181,20 +181,21 @@ fun ReadingScreen(story: Story, progressRepository: ProgressRepository, onBack: 
             }
 
             Spacer(modifier = Modifier.height(4.dp))
-            AndroidView(
-                factory = { ctx ->
-                    AdiveryBannerAdView(ctx).apply {
-                        layoutParams = ViewGroup.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
-                        )
-                        setPlacementId(BANNER_PLACEMENT_ID)
-                        setBannerSize(BannerSize.BANNER)
-                        loadAd()
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                AndroidView(
+                    factory = { ctx ->
+                        AdiveryBannerAdView(ctx).apply {
+                            layoutParams = ViewGroup.LayoutParams(
+                                ViewGroup.LayoutParams.WRAP_CONTENT,
+                                ViewGroup.LayoutParams.WRAP_CONTENT
+                            )
+                            setPlacementId(BANNER_PLACEMENT_ID)
+                            setBannerSize(BannerSize.BANNER)
+                            loadAd()
+                        }
                     }
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
+                )
+            }
         }
     }
 }

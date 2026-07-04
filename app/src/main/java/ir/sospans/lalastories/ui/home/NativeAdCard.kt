@@ -89,50 +89,54 @@ fun NativeAdCard(onNoAd: () -> Unit) {
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-
-            // Image: prefer URL (loaded by Coil), fall back to Drawable, then placeholder
-            when {
-                data.imageUrl != null -> AsyncImage(
-                    model = data.imageUrl,
-                    contentDescription = data.headline,
-                    modifier = Modifier.fillMaxSize()
-                )
-                data.imageDrawable != null -> AndroidView(
-                    factory = { ctx ->
-                        ImageView(ctx).apply {
-                            layoutParams = ViewGroup.LayoutParams(
-                                ViewGroup.LayoutParams.MATCH_PARENT,
-                                ViewGroup.LayoutParams.MATCH_PARENT
-                            )
-                            scaleType = ImageView.ScaleType.CENTER_CROP
-                            setImageDrawable(data.imageDrawable)
-                        }
-                    },
-                    modifier = Modifier.fillMaxSize()
-                )
-                else -> Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.primaryContainer)
-                )
-            }
-
-            // "تبلیغ" badge
+        Column(modifier = Modifier.fillMaxSize()) {
             Box(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(6.dp)
-                    .background(Color(0xAA7C4DFF), RoundedCornerShape(4.dp))
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
+                    .fillMaxWidth()
+                    .weight(1f)
             ) {
-                Text("تبلیغ", color = Color.White, fontSize = 10.sp)
+                // Image: prefer URL (loaded by Coil), fall back to Drawable, then placeholder
+                when {
+                    data.imageUrl != null -> AsyncImage(
+                        model = data.imageUrl,
+                        contentDescription = data.headline,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    data.imageDrawable != null -> AndroidView(
+                        factory = { ctx ->
+                            ImageView(ctx).apply {
+                                layoutParams = ViewGroup.LayoutParams(
+                                    ViewGroup.LayoutParams.MATCH_PARENT,
+                                    ViewGroup.LayoutParams.MATCH_PARENT
+                                )
+                                scaleType = ImageView.ScaleType.CENTER_CROP
+                                setImageDrawable(data.imageDrawable)
+                            }
+                        },
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    else -> Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.primaryContainer)
+                    )
+                }
+
+                // "تبلیغ" badge
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(6.dp)
+                        .background(Color(0xAA7C4DFF), RoundedCornerShape(4.dp))
+                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                ) {
+                    Text("تبلیغ", color = Color.White, fontSize = 10.sp)
+                }
             }
 
-            // Bottom overlay: headline + CTA
+            // Headline + CTA below the image
             Column(
                 modifier = Modifier
-                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
                     .background(Color(0xDD1A1A2E))
                     .padding(8.dp),
