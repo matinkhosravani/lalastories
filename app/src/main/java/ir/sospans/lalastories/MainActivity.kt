@@ -73,11 +73,11 @@ class MainActivity : ComponentActivity() {
 
     private fun copyBundledLullabiesIfNeeded(lullabiesDir: File) {
         val prefs = getSharedPreferences("app_state", MODE_PRIVATE)
-        if (prefs.getBoolean("lullabies_copied_v1", false)) return
+        if (prefs.getBoolean("lullabies_copied_v2", false)) return
 
         lullabiesDir.deleteRecursively()
         copyAssetDir("lullabies", lullabiesDir)
-        prefs.edit().putBoolean("lullabies_copied_v1", true).apply()
+        prefs.edit().putBoolean("lullabies_copied_v2", true).apply()
     }
 
     private fun copyAssetDir(assetPath: String, destDir: File) {
