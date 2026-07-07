@@ -21,7 +21,6 @@ import ir.sospans.lalastories.ui.lullabies.LullabiesScreen
 import ir.sospans.lalastories.ui.lullaby.LullabyPlayerScreen
 import ir.sospans.lalastories.ui.poems.PoemsScreen
 import ir.sospans.lalastories.ui.reading.ReadingScreen
-import ir.sospans.lalastories.ui.settings.SettingsScreen
 import ir.sospans.lalastories.ui.stories.StoriesScreen
 
 private const val INTERSTITIAL_PLACEMENT_ID = "e3d7931e-195b-4ee7-b621-e3b1dbd0a569"
@@ -38,7 +37,6 @@ sealed class Screen(val route: String) {
     object Listening : Screen("listening/{storyId}") {
         fun createRoute(storyId: String) = "listening/$storyId"
     }
-    object Settings : Screen("settings")
     object Poems : Screen("poems")
     object Lullabies : Screen("lullabies")
     object LullabyPlayer : Screen("lullabyPlayer/{lullabyId}") {
@@ -60,8 +58,7 @@ fun AppNavigation(
             HomeScreen(
                 onStoriesClick = { navController.navigate(Screen.Stories.route) },
                 onPoemsClick = { navController.navigate(Screen.Poems.route) },
-                onLullabiesClick = { navController.navigate(Screen.Lullabies.route) },
-                onSettingsClick = { navController.navigate(Screen.Settings.route) }
+                onLullabiesClick = { navController.navigate(Screen.Lullabies.route) }
             )
         }
         composable(Screen.Stories.route) {
@@ -109,9 +106,6 @@ fun AppNavigation(
                 progressRepository = progressRepository,
                 onBack = { navController.popBackStack() }
             )
-        }
-        composable(Screen.Settings.route) {
-            SettingsScreen(onBack = { navController.popBackStack() })
         }
         composable(Screen.Poems.route) {
             PoemsScreen(

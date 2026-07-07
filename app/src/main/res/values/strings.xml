@@ -4,9 +4,6 @@
     <string name="btn_read">بخوان</string>
     <string name="btn_listen">گوش بده</string>
     <string name="btn_restart">شروع از اول</string>
-    <string name="settings_title">تنظیمات</string>
-    <string name="font_size_label">اندازه قلم</string>
-    <string name="speed_label">سرعت صدا</string>
     <string name="poems_section_title">اشعار</string>
     <string name="poems_section_subtitle">یک شعر تصادفی بخوان</string>
     <string name="poems_empty">هنوز شعری اضافه نشده است</string>

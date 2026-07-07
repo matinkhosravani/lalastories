@@ -171,7 +171,7 @@ fun ReadingScreen(story: Story, progressRepository: ProgressRepository, onBack: 
             ) {
                 // Right side in RTL (first child = start = right)
                 if (currentPage < totalPages) {
-                    Button(onClick = { goToNextPage() }) { Text("بعدی →") }
+                    Button(onClick = { goToNextPage() }) { Text("→ بعدی") }
                 } else {
                     TextButton(
                         onClick = {
@@ -188,7 +188,7 @@ fun ReadingScreen(story: Story, progressRepository: ProgressRepository, onBack: 
                     OutlinedButton(onClick = {
                         goingForward = false
                         currentPage--
-                    }) { Text("← قبلی") }
+                    }) { Text("قبلی ←") }
                 } else {
                     TextButton(
                         onClick = {
