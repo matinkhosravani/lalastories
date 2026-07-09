@@ -5,7 +5,9 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
@@ -155,12 +157,19 @@ fun ReadingScreen(story: Story, progressRepository: ProgressRepository, onBack: 
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                     }
-                    Text(
-                        text = page.text,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Right,
-                        modifier = Modifier.weight(1f).fillMaxWidth()
-                    )
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                    ) {
+                        Text(
+                            text = page.text,
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Right,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
 
