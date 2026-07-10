@@ -1,7 +1,7 @@
 package ir.sospans.lalastories.remote
 
 object RemoteConfig {
-    const val CDN_BASE_URL = "http://cdn-lalastories.baftaloo.ir"
+    const val CDN_BASE_URL = "https://cdn-lalastories.baftaloo.ir"
 
     const val STORIES_MANIFEST_URL = "$CDN_BASE_URL/stories-manifest.json"
     const val POEMS_MANIFEST_URL = "$CDN_BASE_URL/poems-manifest.json"
