@@ -4,13 +4,19 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.lifecycle.lifecycleScope
 import com.adivery.sdk.Adivery
 import ir.sospans.lalastories.navigation.AppNavigation
+import ir.sospans.lalastories.remote.ContentCacheIndex
+import ir.sospans.lalastories.remote.ContentDownloader
+import ir.sospans.lalastories.remote.ManifestClient
 import ir.sospans.lalastories.repository.LullabyRepository
 import ir.sospans.lalastories.repository.PoemRepository
 import ir.sospans.lalastories.repository.ProgressRepository
 import ir.sospans.lalastories.repository.StoryRepository
 import ir.sospans.lalastories.ui.theme.KidStoriesTheme
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 
 class MainActivity : ComponentActivity() {
@@ -37,10 +43,34 @@ class MainActivity : ComponentActivity() {
         val lullabiesDir = File(getExternalFilesDir(null), "lullabies")
         copyBundledLullabiesIfNeeded(lullabiesDir)
 
-        val storyRepository = StoryRepository(storiesDir)
-        val poemRepository = PoemRepository(poemsDir)
-        val lullabyRepository = LullabyRepository(lullabiesDir)
+        val remoteRootDir = File(getExternalFilesDir(null), "remote-cache")
+        val manifestClient = ManifestClient(remoteRootDir)
+        val cacheIndex = ContentCacheIndex(File(remoteRootDir, "cache-index.json"))
+        val contentDownloader = ContentDownloader(remoteRootDir, cacheIndex)
+
+        val storyRepository = StoryRepository(
+            storiesDir, File(remoteRootDir, "stories"), manifestClient, cacheIndex, contentDownloader
+        )
+        val poemRepository = PoemRepository(
+            poemsDir, File(remoteRootDir, "poems"), manifestClient, cacheIndex, contentDownloader
+        )
+        val lullabyRepository = LullabyRepository(
+            lullabiesDir, File(remoteRootDir, "lullabies"), manifestClient, cacheIndex, contentDownloader
+        )
         val progressRepository = ProgressRepository(this)
+
+        // Refresh the 3 static manifests in the background on every launch. Failure (offline,
+        // CDN unreachable) is silent - screens just keep using whatever was cached last time,
+        // or bundled-only content if a manifest has never been fetched successfully.
+        lifecycleScope.launch(Dispatchers.IO) {
+            manifestClient.refreshStoryManifest()
+        }
+        lifecycleScope.launch(Dispatchers.IO) {
+            manifestClient.refreshPoemManifest()
+        }
+        lifecycleScope.launch(Dispatchers.IO) {
+            manifestClient.refreshLullabyManifest()
+        }
 
         setContent {
             KidStoriesTheme {

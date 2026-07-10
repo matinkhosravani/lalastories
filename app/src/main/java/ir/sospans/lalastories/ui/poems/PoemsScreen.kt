@@ -46,12 +46,24 @@ private val PoemGradients = listOf(
 @Composable
 fun PoemsScreen(poemRepository: PoemRepository, onBack: () -> Unit) {
     val context = LocalContext.current
-    val poems = remember { poemRepository.loadPoems().shuffled() }
+    var poems by remember { mutableStateOf(poemRepository.loadPoems().shuffled()) }
     var currentIndex by remember { mutableIntStateOf(0) }
     var navigationCount by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         Adivery.prepareInterstitialAd(context, INTERSTITIAL_PLACEMENT_ID)
+    }
+
+    // Poem already renders from the manifest's URL (see placeholder()); this just downloads
+    // it in the background so the next offline visit doesn't need the network at all.
+    LaunchedEffect(poems.getOrNull(currentIndex)?.id) {
+        val current = poems.getOrNull(currentIndex) ?: return@LaunchedEffect
+        if (!current.isRemotePending) return@LaunchedEffect
+        if (poemRepository.ensurePoemDownloaded(current.id)) {
+            poemRepository.loadPoems().firstOrNull { it.id == current.id }?.let { fresh ->
+                poems = poems.map { if (it.id == fresh.id) fresh else it }
+            }
+        }
     }
 
     fun onNavigate(newIndex: Int) {

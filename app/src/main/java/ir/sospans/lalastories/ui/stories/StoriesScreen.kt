@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
@@ -28,13 +29,16 @@ private sealed class StoriesGridItem {
 @Composable
 fun StoriesScreen(stories: List<Story>, onStoryClick: (Story) -> Unit, onBack: () -> Unit) {
     var showAd by remember { mutableStateOf(true) }
+    var voiceOnly by remember { mutableStateOf(false) }
+
+    val visibleStories = if (voiceOnly) stories.filter { it.audioPath != null } else stories
 
     val gridItems: List<StoriesGridItem> = buildList {
-        stories.forEachIndexed { index, story ->
+        visibleStories.forEachIndexed { index, story ->
             if (index == 2 && showAd) add(StoriesGridItem.Ad)
             add(StoriesGridItem.StoryItem(story))
         }
-        if (stories.size <= 2 && showAd) add(StoriesGridItem.Ad)
+        if (visibleStories.size <= 2 && showAd) add(StoriesGridItem.Ad)
     }
 
     Scaffold(
@@ -57,28 +61,46 @@ fun StoriesScreen(stories: List<Story>, onStoryClick: (Story) -> Unit, onBack: (
             }
         }
     ) { padding ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.padding(padding)
-        ) {
-            items(
-                items = gridItems,
-                key = { item ->
-                    when (item) {
-                        is StoriesGridItem.StoryItem -> item.story.id
-                        is StoriesGridItem.Ad -> "native_ad"
-                    }
-                }
-            ) { item ->
-                when (item) {
-                    is StoriesGridItem.StoryItem -> StoryCard(
-                        story = item.story,
-                        onClick = { onStoryClick(item.story) }
+        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                Row(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                    FilterChip(
+                        selected = voiceOnly,
+                        onClick = { voiceOnly = !voiceOnly },
+                        label = { Text(stringResource(R.string.stories_voice_only_filter)) },
+                        leadingIcon = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_headphones),
+                                contentDescription = null,
+                                modifier = Modifier.size(FilterChipDefaults.IconSize)
+                            )
+                        }
                     )
-                    is StoriesGridItem.Ad -> NativeAdCard(onNoAd = { showAd = false })
+                }
+            }
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier = Modifier.weight(1f)
+            ) {
+                items(
+                    items = gridItems,
+                    key = { item ->
+                        when (item) {
+                            is StoriesGridItem.StoryItem -> item.story.id
+                            is StoriesGridItem.Ad -> "native_ad"
+                        }
+                    }
+                ) { item ->
+                    when (item) {
+                        is StoriesGridItem.StoryItem -> StoryCard(
+                            story = item.story,
+                            onClick = { onStoryClick(item.story) }
+                        )
+                        is StoriesGridItem.Ad -> NativeAdCard(onNoAd = { showAd = false })
+                    }
                 }
             }
         }

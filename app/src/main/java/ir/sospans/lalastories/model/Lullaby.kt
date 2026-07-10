@@ -7,5 +7,6 @@ data class Lullaby(
     val image: String? = null,
     val imagePath: String? = null,
     val audio: String? = null,
-    val audioPath: String? = null
+    val audioPath: String? = null,
+    val isRemotePending: Boolean = false
 )

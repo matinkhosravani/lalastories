@@ -5,5 +5,6 @@ data class Poem(
     val title: String,
     val text: String,
     val image: String? = null,
-    val imagePath: String? = null
+    val imagePath: String? = null,
+    val isRemotePending: Boolean = false
 )

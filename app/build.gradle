@@ -93,6 +93,7 @@ dependencies {
     implementation 'androidx.navigation:navigation-compose:2.7.6'
     implementation 'io.coil-kt:coil-compose:2.5.0'
     implementation 'com.google.code.gson:gson:2.10.1'
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.adivery:sdk:4.8.8'
     implementation 'io.adtrace:android-sdk:2.6.0'
     implementation 'com.android.installreferrer:installreferrer:2.2'

@@ -15,5 +15,6 @@ data class Story(
     val ageMax: Int,
     val pages: List<Page>,
     val coverPath: String? = null,
-    val audioPath: String? = null
+    val audioPath: String? = null,
+    val isRemotePending: Boolean = false
 )

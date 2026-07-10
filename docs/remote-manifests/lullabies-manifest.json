@@ -1,0 +1,22 @@
+{
+  "manifestVersion": 1,
+  "generatedAt": "2026-07-10T12:00:00Z",
+  "items": [
+    {
+      "id": "khab-mah",
+      "version": 1,
+      "title": "خوابِ ماه",
+      "image": "https://cdn.example.ir/lalastories/lullabies/khab-mah/image.jpg",
+      "audio": "https://cdn.example.ir/lalastories/lullabies/khab-mah/audio.mp3",
+      "text": "لالا لالا، گُلِ نازم،\nچراغِ کوچکِ آغازم،\nستاره پشتِ ابر افتاد،\nبخواب ای کودکِ دلبازم."
+    },
+    {
+      "id": "setare-koochak",
+      "version": 1,
+      "title": "ستاره کوچک",
+      "image": "https://cdn.example.ir/lalastories/lullabies/setare-koochak/image.jpg",
+      "audio": "https://cdn.example.ir/lalastories/lullabies/setare-koochak/audio.mp3",
+      "text": "لالایی جدید برای ستاره کوچک، بخواب آروم عزیزم."
+    }
+  ]
+}

@@ -12,4 +12,5 @@
     <string name="lullabies_section_title">لالایی‌ها</string>
     <string name="lullabies_section_subtitle">لالایی بخون تا بچه بخوابه</string>
     <string name="lullabies_empty">هنوز لالایی‌ای اضافه نشده است</string>
+    <string name="stories_voice_only_filter">فقط داستان‌های صوتی</string>
 </resources>

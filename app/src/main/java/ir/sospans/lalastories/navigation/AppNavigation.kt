@@ -91,6 +91,7 @@ fun AppNavigation(
             val story = storyRepository.loadStories().first { it.id == storyId }
             ReadingScreen(
                 story = story,
+                storyRepository = storyRepository,
                 progressRepository = progressRepository,
                 onBack = { navController.popBackStack() }
             )
@@ -103,6 +104,7 @@ fun AppNavigation(
             val story = storyRepository.loadStories().first { it.id == storyId }
             ListeningScreen(
                 story = story,
+                storyRepository = storyRepository,
                 progressRepository = progressRepository,
                 onBack = { navController.popBackStack() }
             )
@@ -142,6 +144,7 @@ fun AppNavigation(
             val lullabyId = backStack.arguments?.getString("lullabyId")!!
             LullabyPlayerScreen(
                 lullabies = lullabyRepository.loadLullabies(),
+                lullabyRepository = lullabyRepository,
                 startLullabyId = lullabyId,
                 onBack = { navController.popBackStack() }
             )

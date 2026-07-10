@@ -31,6 +31,7 @@ import com.adivery.sdk.BannerSize
 import ir.sospans.lalastories.R
 import ir.sospans.lalastories.model.Lullaby
 import ir.sospans.lalastories.player.AudioPlayer
+import ir.sospans.lalastories.repository.LullabyRepository
 import kotlinx.coroutines.delay
 
 private const val BANNER_PLACEMENT_ID = "aa78c7e1-292a-40fa-973a-6abb2fa7e6db"
@@ -43,7 +44,13 @@ private fun formatTime(ms: Long): String {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LullabyPlayerScreen(lullabies: List<Lullaby>, startLullabyId: String, onBack: () -> Unit) {
+fun LullabyPlayerScreen(
+    lullabies: List<Lullaby>,
+    lullabyRepository: LullabyRepository,
+    startLullabyId: String,
+    onBack: () -> Unit
+) {
+    var lullabies by remember { mutableStateOf(lullabies) }
     val startIndex = remember { lullabies.indexOfFirst { it.id == startLullabyId }.coerceAtLeast(0) }
     val audioPlayer = remember { AudioPlayer() }
 
@@ -92,6 +99,21 @@ fun LullabyPlayerScreen(lullabies: List<Lullaby>, startLullabyId: String, onBack
 
     LaunchedEffect(Unit) {
         loadLullaby(startIndex, autoplay = false)
+    }
+
+    // Lullaby already renders/plays from the manifest's URL (see placeholder()); this just
+    // downloads it in the background so the next offline visit doesn't need the network.
+    LaunchedEffect(currentIndex) {
+        val current = lullabies.getOrNull(currentIndex) ?: return@LaunchedEffect
+        if (!current.isRemotePending) return@LaunchedEffect
+        if (lullabyRepository.ensureLullabyDownloaded(current.id)) {
+            lullabyRepository.loadLullabies().firstOrNull { it.id == current.id }?.let { fresh ->
+                lullabies = lullabies.map { if (it.id == fresh.id) fresh else it }
+                if (currentIndex < lullabies.size && lullabies[currentIndex].id == fresh.id) {
+                    loadLullaby(currentIndex, autoplay = isPlaying)
+                }
+            }
+        }
     }
 
     DisposableEffect(Unit) {

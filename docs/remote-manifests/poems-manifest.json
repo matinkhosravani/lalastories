@@ -1,0 +1,20 @@
+{
+  "manifestVersion": 1,
+  "generatedAt": "2026-07-10T12:00:00Z",
+  "items": [
+    {
+      "id": "gorbe",
+      "version": 1,
+      "title": "گربه کوچولو",
+      "image": "https://cdn.example.ir/lalastories/poems/gorbe/image.jpg",
+      "text": "گُربهٔ کوچولو، مو مو مو\nدُمِ نازش رو تِکون داد\n\nرَفت تو حِیاط، دید یه پروانه\nدوید و رَفت دُنبالِش"
+    },
+    {
+      "id": "khorshid-khanoom",
+      "version": 1,
+      "title": "خورشید خانوم",
+      "image": "https://cdn.example.ir/lalastories/poems/khorshid-khanoom/image.jpg",
+      "text": "خورشید خانوم، آفتابو\nاز پشتِ کوه بیار بیرون"
+    }
+  ]
+}

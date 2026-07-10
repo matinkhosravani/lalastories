@@ -21,13 +21,16 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.compose.ui.viewinterop.AndroidView
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import com.adivery.sdk.AdiveryBannerAdView
 import com.adivery.sdk.BannerSize
 import ir.sospans.lalastories.model.Story
@@ -35,6 +38,7 @@ import ir.sospans.lalastories.model.StoryProgress
 import ir.sospans.lalastories.player.AudioPlayer
 import ir.sospans.lalastories.player.TtsPlayer
 import ir.sospans.lalastories.repository.ProgressRepository
+import ir.sospans.lalastories.repository.StoryRepository
 
 private data class TextSegment(val startMs: Long, val text: String)
 
@@ -61,8 +65,43 @@ private fun formatTime(ms: Long): String {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ListeningScreen(story: Story, progressRepository: ProgressRepository, onBack: () -> Unit) {
+fun ListeningScreen(
+    story: Story,
+    storyRepository: StoryRepository,
+    progressRepository: ProgressRepository,
+    onBack: () -> Unit
+) {
     val context = LocalContext.current
+    var resolvedStory by remember(story.id) { mutableStateOf(story) }
+
+    LaunchedEffect(story.id) {
+        val available = storyRepository.ensureStoryDownloaded(story.id)
+        if (available) {
+            storyRepository.loadStories().firstOrNull { it.id == story.id }?.let { resolvedStory = it }
+        }
+    }
+
+    if (resolvedStory.pages.isEmpty()) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(resolvedStory.title) },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "برگشت")
+                        }
+                    }
+                )
+            }
+        ) { padding ->
+            Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
+        return
+    }
+
+    val story = resolvedStory
     val savedProgress = remember { progressRepository.getProgress(story.id) }
     val fullText = remember { story.pages.joinToString("\n\n") { it.text } }
 
@@ -97,7 +136,7 @@ fun ListeningScreen(story: Story, progressRepository: ProgressRepository, onBack
 
     LaunchedEffect(Unit) {
         if (useAudio) {
-            audioPlayer.load(story.audioPath!!, savedProgress.lastPositionMs)
+            withContext(Dispatchers.IO) { audioPlayer.load(story.audioPath!!, savedProgress.lastPositionMs) }
             durationMs = audioPlayer.getDurationMs()
             currentPositionMs = savedProgress.lastPositionMs
             audioPlayer.setOnCompletionListener {

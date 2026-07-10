@@ -17,8 +17,14 @@
 -keep class * implements com.google.gson.JsonSerializer
 -keep class * implements com.google.gson.JsonDeserializer
 
+# Gson TypeToken anonymous subclasses need their generic signature preserved,
+# otherwise `object : TypeToken<List<X>>() {}` crashes at runtime under R8.
+-keep,allowobfuscation,allowshrinking class com.google.gson.reflect.TypeToken
+-keep,allowobfuscation,allowshrinking class * extends com.google.gson.reflect.TypeToken
+
 # App models (used with Gson)
 -keep class ir.sospans.lalastories.model.** { *; }
+-keep class ir.sospans.lalastories.remote.** { *; }
 
 # Coil
 -keep class coil.** { *; }
