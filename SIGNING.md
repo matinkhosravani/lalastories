@@ -50,3 +50,4 @@ cd /home/matin/projects/Kid-stories
 |-------------|-------------|------------------------------|
 | 1           | 1.0         | First upload to CafeBazaar   |
 | 2           | 1.1         | Added Snow White, Puss in Boots, app title update |
+| 5           | 1.4         | Remote content (CDN manifest for stories/poems/lullabies), app title update |
