@@ -10,12 +10,16 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.adivery.sdk.Adivery
 import com.adivery.sdk.AdiveryListener
+import ir.sospans.lalastories.repository.InteractiveStoryRepository
 import ir.sospans.lalastories.repository.LullabyRepository
 import ir.sospans.lalastories.repository.PoemRepository
 import ir.sospans.lalastories.repository.ProgressRepository
 import ir.sospans.lalastories.repository.StoryRepository
+import ir.sospans.lalastories.ui.detail.InteractiveStoryDetailScreen
 import ir.sospans.lalastories.ui.detail.StoryDetailScreen
 import ir.sospans.lalastories.ui.home.HomeScreen
+import ir.sospans.lalastories.ui.interactivestories.InteractiveStoriesScreen
+import ir.sospans.lalastories.ui.interactivestory.InteractiveStoryPlayerScreen
 import ir.sospans.lalastories.ui.listening.ListeningScreen
 import ir.sospans.lalastories.ui.lullabies.LullabiesScreen
 import ir.sospans.lalastories.ui.lullaby.LullabyPlayerScreen
@@ -42,6 +46,13 @@ sealed class Screen(val route: String) {
     object LullabyPlayer : Screen("lullabyPlayer/{lullabyId}") {
         fun createRoute(lullabyId: String) = "lullabyPlayer/$lullabyId"
     }
+    object InteractiveStories : Screen("interactiveStories")
+    object InteractiveStoryDetail : Screen("interactiveStoryDetail/{storyId}") {
+        fun createRoute(storyId: String) = "interactiveStoryDetail/$storyId"
+    }
+    object InteractiveStoryPlayer : Screen("interactiveStoryPlayer/{storyId}") {
+        fun createRoute(storyId: String) = "interactiveStoryPlayer/$storyId"
+    }
 }
 
 @Composable
@@ -49,6 +60,7 @@ fun AppNavigation(
     storyRepository: StoryRepository,
     poemRepository: PoemRepository,
     lullabyRepository: LullabyRepository,
+    interactiveStoryRepository: InteractiveStoryRepository,
     progressRepository: ProgressRepository
 ) {
     val navController = rememberNavController()
@@ -58,7 +70,8 @@ fun AppNavigation(
             HomeScreen(
                 onStoriesClick = { navController.navigate(Screen.Stories.route) },
                 onPoemsClick = { navController.navigate(Screen.Poems.route) },
-                onLullabiesClick = { navController.navigate(Screen.Lullabies.route) }
+                onLullabiesClick = { navController.navigate(Screen.Lullabies.route) },
+                onInteractiveStoriesClick = { navController.navigate(Screen.InteractiveStories.route) }
             )
         }
         composable(Screen.Stories.route) {
@@ -146,6 +159,39 @@ fun AppNavigation(
                 lullabies = lullabyRepository.loadLullabies(),
                 lullabyRepository = lullabyRepository,
                 startLullabyId = lullabyId,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.InteractiveStories.route) {
+            InteractiveStoriesScreen(
+                stories = interactiveStoryRepository.loadInteractiveStories(),
+                onStoryClick = { story ->
+                    navController.navigate(Screen.InteractiveStoryDetail.createRoute(story.id))
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(
+            Screen.InteractiveStoryDetail.route,
+            arguments = listOf(navArgument("storyId") { type = NavType.StringType })
+        ) { backStack ->
+            val storyId = backStack.arguments?.getString("storyId")!!
+            val story = interactiveStoryRepository.loadInteractiveStories().first { it.id == storyId }
+            InteractiveStoryDetailScreen(
+                story = story,
+                onPlayClick = { navController.navigate(Screen.InteractiveStoryPlayer.createRoute(storyId)) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(
+            Screen.InteractiveStoryPlayer.route,
+            arguments = listOf(navArgument("storyId") { type = NavType.StringType })
+        ) { backStack ->
+            val storyId = backStack.arguments?.getString("storyId")!!
+            val story = interactiveStoryRepository.loadInteractiveStories().first { it.id == storyId }
+            InteractiveStoryPlayerScreen(
+                story = story,
+                progressRepository = progressRepository,
                 onBack = { navController.popBackStack() }
             )
         }

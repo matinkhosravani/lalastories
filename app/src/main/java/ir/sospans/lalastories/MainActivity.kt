@@ -10,6 +10,7 @@ import ir.sospans.lalastories.navigation.AppNavigation
 import ir.sospans.lalastories.remote.ContentCacheIndex
 import ir.sospans.lalastories.remote.ContentDownloader
 import ir.sospans.lalastories.remote.ManifestClient
+import ir.sospans.lalastories.repository.InteractiveStoryRepository
 import ir.sospans.lalastories.repository.LullabyRepository
 import ir.sospans.lalastories.repository.PoemRepository
 import ir.sospans.lalastories.repository.ProgressRepository
@@ -43,6 +44,9 @@ class MainActivity : ComponentActivity() {
         val lullabiesDir = File(getExternalFilesDir(null), "lullabies")
         copyBundledLullabiesIfNeeded(lullabiesDir)
 
+        val interactiveStoriesDir = File(getExternalFilesDir(null), "interactive-stories")
+        copyBundledInteractiveStoriesIfNeeded(interactiveStoriesDir)
+
         val remoteRootDir = File(getExternalFilesDir(null), "remote-cache")
         val manifestClient = ManifestClient(remoteRootDir)
         val cacheIndex = ContentCacheIndex(File(remoteRootDir, "cache-index.json"))
@@ -57,6 +61,7 @@ class MainActivity : ComponentActivity() {
         val lullabyRepository = LullabyRepository(
             lullabiesDir, File(remoteRootDir, "lullabies"), manifestClient, cacheIndex, contentDownloader
         )
+        val interactiveStoryRepository = InteractiveStoryRepository(interactiveStoriesDir)
         val progressRepository = ProgressRepository(this)
 
         // Refresh the 3 static manifests in the background on every launch. Failure (offline,
@@ -78,6 +83,7 @@ class MainActivity : ComponentActivity() {
                     storyRepository = storyRepository,
                     poemRepository = poemRepository,
                     lullabyRepository = lullabyRepository,
+                    interactiveStoryRepository = interactiveStoryRepository,
                     progressRepository = progressRepository
                 )
             }
@@ -108,6 +114,15 @@ class MainActivity : ComponentActivity() {
         lullabiesDir.deleteRecursively()
         copyAssetDir("lullabies", lullabiesDir)
         prefs.edit().putBoolean("lullabies_copied_v2", true).apply()
+    }
+
+    private fun copyBundledInteractiveStoriesIfNeeded(dir: File) {
+        val prefs = getSharedPreferences("app_state", MODE_PRIVATE)
+        if (prefs.getBoolean("interactive_stories_copied_v1", false)) return
+
+        dir.deleteRecursively()
+        copyAssetDir("interactive-stories", dir)
+        prefs.edit().putBoolean("interactive_stories_copied_v1", true).apply()
     }
 
     private fun copyAssetDir(assetPath: String, destDir: File) {
