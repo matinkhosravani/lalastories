@@ -61,10 +61,12 @@ class MainActivity : ComponentActivity() {
         val lullabyRepository = LullabyRepository(
             lullabiesDir, File(remoteRootDir, "lullabies"), manifestClient, cacheIndex, contentDownloader
         )
-        val interactiveStoryRepository = InteractiveStoryRepository(interactiveStoriesDir)
+        val interactiveStoryRepository = InteractiveStoryRepository(
+            interactiveStoriesDir, File(remoteRootDir, "interactive-stories"), manifestClient, cacheIndex, contentDownloader
+        )
         val progressRepository = ProgressRepository(this)
 
-        // Refresh the 3 static manifests in the background on every launch. Failure (offline,
+        // Refresh the 4 static manifests in the background on every launch. Failure (offline,
         // CDN unreachable) is silent - screens just keep using whatever was cached last time,
         // or bundled-only content if a manifest has never been fetched successfully.
         lifecycleScope.launch(Dispatchers.IO) {
@@ -75,6 +77,9 @@ class MainActivity : ComponentActivity() {
         }
         lifecycleScope.launch(Dispatchers.IO) {
             manifestClient.refreshLullabyManifest()
+        }
+        lifecycleScope.launch(Dispatchers.IO) {
+            manifestClient.refreshInteractiveStoriesManifest()
         }
 
         setContent {

@@ -90,14 +90,18 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                LullabiesEntryCard(onClick = onLullabiesClick)
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                InteractiveStoriesEntryCard(onClick = onInteractiveStoriesClick)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    LullabiesEntryCard(onClick = onLullabiesClick)
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    InteractiveStoriesEntryCard(onClick = onInteractiveStoriesClick)
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))

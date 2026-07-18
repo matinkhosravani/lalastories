@@ -5,15 +5,72 @@ import ir.sospans.lalastories.model.ChoiceOption
 import ir.sospans.lalastories.model.InteractiveStory
 import ir.sospans.lalastories.model.QuizAnswer
 import ir.sospans.lalastories.model.StoryNode
+import ir.sospans.lalastories.remote.ContentCacheIndex
+import ir.sospans.lalastories.remote.ContentDownloader
+import ir.sospans.lalastories.remote.ManifestClient
+import ir.sospans.lalastories.remote.RemoteInteractiveNode
+import ir.sospans.lalastories.remote.RemoteInteractiveStoryItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 
-class InteractiveStoryRepository(private val storiesDir: File) {
+class InteractiveStoryRepository(
+    private val storiesDir: File,
+    private val remoteStoriesDir: File? = null,
+    private val manifestClient: ManifestClient? = null,
+    private val cacheIndex: ContentCacheIndex? = null,
+    private val downloader: ContentDownloader? = null
+) {
 
     private val gson = Gson()
 
+    /**
+     * Bundled stories, with any remote-cache download overriding the bundled copy by id,
+     * followed by remote-only stories (not shipped in the app) appended in manifest order.
+     * Remote items that exist in the manifest but haven't been downloaded yet appear as
+     * placeholders built directly from the manifest so they still show up in the list while
+     * offline.
+     */
     fun loadInteractiveStories(): List<InteractiveStory> {
-        if (!storiesDir.exists()) return emptyList()
-        return storiesDir.listFiles()
+        val bundled = parseDir(storiesDir)
+        val remoteCached = parseDir(remoteStoriesDir).associateBy { it.id }
+        val bundledIds = bundled.map { it.id }.toSet()
+
+        val merged = bundled.map { story -> remoteCached[story.id] ?: story }
+
+        val manifestItems = manifestClient?.cachedInteractiveStoriesManifest()?.items ?: emptyList()
+        val remoteOnly = manifestItems
+            .filter { it.id !in bundledIds }
+            .mapNotNull { item -> remoteCached[item.id] ?: placeholder(item) }
+
+        return merged + remoteOnly
+    }
+
+    /**
+     * Ensures the given interactive story's full content (all node images, cover) is
+     * available locally. Returns true if it is (already local, or freshly downloaded);
+     * false only when the story has no local fallback at all and the download failed
+     * (e.g. offline).
+     */
+    suspend fun ensureInteractiveStoryDownloaded(id: String): Boolean = withContext(Dispatchers.IO) {
+        val item = manifestClient?.cachedInteractiveStoriesManifest()?.items?.find { it.id == id }
+            ?: return@withContext true // no remote entry for this id, nothing to do
+
+        val key = "interactive-stories/$id"
+        val now = System.currentTimeMillis()
+        val index = cacheIndex ?: return@withContext true
+
+        if (!index.needsRedownload(key, item.version)) {
+            if (index.isStale(key, now)) index.refreshDownloadedAt(key, now) else index.touch(key, now)
+            return@withContext true
+        }
+
+        downloader?.downloadInteractiveStory(item, now) ?: false
+    }
+
+    private fun parseDir(dir: File?): List<InteractiveStory> {
+        if (dir == null || !dir.exists()) return emptyList()
+        return dir.listFiles()
             ?.filter { it.isDirectory && !it.name.startsWith("tmp-") }
             ?.mapNotNull { parseStoryDir(it) }
             ?: emptyList()
@@ -82,6 +139,56 @@ class InteractiveStoryRepository(private val storiesDir: File) {
 
     private fun resolveImage(dir: File, relativePath: String): String? =
         File(dir, relativePath).takeIf { it.exists() }?.absolutePath
+
+    /**
+     * Shown before the atomic download finishes (or if it fails while offline): node/option/
+     * answer images and cover load directly from the manifest's URLs (Coil accepts a URL the
+     * same way it accepts a local path) so the story is playable immediately rather than
+     * blocked behind a spinner. This intentionally does not touch the filesystem - it must
+     * stay usable purely from cached manifest data.
+     */
+    private fun placeholder(item: RemoteInteractiveStoryItem): InteractiveStory? {
+        val nodes = item.nodes.mapValues { (nodeId, raw) -> toRemoteStoryNode(nodeId, raw) }
+        if (!hasValidGraph(item.startNode, nodes)) return null
+        return InteractiveStory(
+            id = item.id,
+            title = item.title,
+            description = item.description,
+            ageMin = item.ageMin,
+            ageMax = item.ageMax,
+            coverPath = item.cover,
+            startNodeId = item.startNode,
+            nodes = nodes
+        )
+    }
+
+    private fun toRemoteStoryNode(nodeId: String, raw: RemoteInteractiveNode): StoryNode = when (raw.type) {
+        "content" -> StoryNode.ContentNode(
+            id = nodeId,
+            text = raw.text.orEmpty(),
+            imagePath = raw.image,
+            next = raw.next.orEmpty()
+        )
+        "choice" -> StoryNode.ChoiceNode(
+            id = nodeId,
+            prompt = raw.prompt.orEmpty(),
+            imagePath = raw.image,
+            options = raw.options.orEmpty().map { option ->
+                ChoiceOption(label = option.label, imagePath = option.image, next = option.next)
+            }
+        )
+        "quiz" -> StoryNode.QuizNode(
+            id = nodeId,
+            question = raw.question.orEmpty(),
+            imagePath = raw.image,
+            answers = raw.answers.orEmpty().map { answer ->
+                QuizAnswer(text = answer.text, imagePath = answer.image, isCorrect = answer.isCorrect)
+            },
+            next = raw.next.orEmpty()
+        )
+        "end" -> StoryNode.EndNode(id = nodeId, text = raw.text.orEmpty(), imagePath = raw.image)
+        else -> throw IllegalArgumentException("Unknown node type: ${raw.type}")
+    }
 
     /**
      * A story only loads if every next/option/answer reference resolves to a real node,

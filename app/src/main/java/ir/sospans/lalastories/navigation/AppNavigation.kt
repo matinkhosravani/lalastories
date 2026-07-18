@@ -191,6 +191,7 @@ fun AppNavigation(
             val story = interactiveStoryRepository.loadInteractiveStories().first { it.id == storyId }
             InteractiveStoryPlayerScreen(
                 story = story,
+                interactiveStoryRepository = interactiveStoryRepository,
                 progressRepository = progressRepository,
                 onBack = { navController.popBackStack() }
             )

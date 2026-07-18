@@ -23,6 +23,7 @@ import ir.sospans.lalastories.R
 import ir.sospans.lalastories.model.InteractiveStory
 import ir.sospans.lalastories.model.InteractiveStoryProgress
 import ir.sospans.lalastories.model.StoryNode
+import ir.sospans.lalastories.repository.InteractiveStoryRepository
 import ir.sospans.lalastories.repository.ProgressRepository
 import kotlinx.coroutines.delay
 
@@ -33,26 +34,36 @@ private val WrongColor = Color(0xFFE53935)
 @Composable
 fun InteractiveStoryPlayerScreen(
     story: InteractiveStory,
+    interactiveStoryRepository: InteractiveStoryRepository,
     progressRepository: ProgressRepository,
     onBack: () -> Unit
 ) {
-    val savedProgress = remember { progressRepository.getInteractiveProgress(story.id) }
+    var resolvedStory by remember(story.id) { mutableStateOf(story) }
+
+    LaunchedEffect(story.id) {
+        val available = interactiveStoryRepository.ensureInteractiveStoryDownloaded(story.id)
+        if (available) {
+            interactiveStoryRepository.loadInteractiveStories().firstOrNull { it.id == story.id }?.let { resolvedStory = it }
+        }
+    }
+
+    val savedProgress = remember { progressRepository.getInteractiveProgress(resolvedStory.id) }
     var currentNodeId by remember {
-        mutableStateOf(savedProgress.currentNodeId?.takeIf { it in story.nodes } ?: story.startNodeId)
+        mutableStateOf(savedProgress.currentNodeId?.takeIf { it in resolvedStory.nodes } ?: resolvedStory.startNodeId)
     }
 
     DisposableEffect(currentNodeId) {
         onDispose {
-            progressRepository.saveInteractiveProgress(InteractiveStoryProgress(story.id, currentNodeId))
+            progressRepository.saveInteractiveProgress(InteractiveStoryProgress(resolvedStory.id, currentNodeId))
         }
     }
 
-    val currentNode = story.nodes[currentNodeId] ?: story.nodes.getValue(story.startNodeId)
+    val currentNode = resolvedStory.nodes[currentNodeId] ?: resolvedStory.nodes.getValue(resolvedStory.startNodeId)
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(story.title) },
+                title = { Text(resolvedStory.title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "برگشت")
@@ -69,8 +80,8 @@ fun InteractiveStoryPlayerScreen(
                 is StoryNode.EndNode -> EndNodeView(
                     node = node,
                     onRestart = {
-                        progressRepository.clearInteractiveProgress(story.id)
-                        currentNodeId = story.startNodeId
+                        progressRepository.clearInteractiveProgress(resolvedStory.id)
+                        currentNodeId = resolvedStory.startNodeId
                     },
                     onHome = onBack
                 )
