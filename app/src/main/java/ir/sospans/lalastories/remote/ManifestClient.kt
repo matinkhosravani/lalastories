@@ -30,9 +30,6 @@ class ManifestClient(private val cacheDir: File) {
     fun refreshLullabyManifest(): RemoteLullabyManifest? =
         refresh(RemoteConfig.LULLABIES_MANIFEST_URL, RemoteConfig.LULLABIES_MANIFEST_CACHE_FILE, RemoteLullabyManifest::class.java)
 
-    fun refreshInteractiveStoriesManifest(): RemoteInteractiveStoryManifest? =
-        refresh(RemoteConfig.INTERACTIVE_STORIES_MANIFEST_URL, RemoteConfig.INTERACTIVE_STORIES_MANIFEST_CACHE_FILE, RemoteInteractiveStoryManifest::class.java)
-
     fun cachedStoryManifest(): RemoteStoryManifest? =
         readCached(RemoteConfig.STORIES_MANIFEST_CACHE_FILE, RemoteStoryManifest::class.java)
 
@@ -41,9 +38,6 @@ class ManifestClient(private val cacheDir: File) {
 
     fun cachedLullabyManifest(): RemoteLullabyManifest? =
         readCached(RemoteConfig.LULLABIES_MANIFEST_CACHE_FILE, RemoteLullabyManifest::class.java)
-
-    fun cachedInteractiveStoriesManifest(): RemoteInteractiveStoryManifest? =
-        readCached(RemoteConfig.INTERACTIVE_STORIES_MANIFEST_CACHE_FILE, RemoteInteractiveStoryManifest::class.java)
 
     private fun <T> refresh(url: String, cacheFileName: String, type: Class<T>): T? {
         return try {

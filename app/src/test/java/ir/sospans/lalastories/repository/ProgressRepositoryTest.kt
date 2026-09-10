@@ -2,7 +2,6 @@ package ir.sospans.lalastories.repository
 
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
-import ir.sospans.lalastories.model.InteractiveStoryProgress
 import ir.sospans.lalastories.model.StoryProgress
 import org.junit.Assert.*
 import org.junit.Before
@@ -47,25 +46,5 @@ class ProgressRepositoryTest {
         assertEquals(1, progress.lastPage)
         assertEquals(0L, progress.lastPositionMs)
         assertEquals("read", progress.mode)
-    }
-
-    @Test
-    fun `getInteractiveProgress returns null currentNodeId when nothing saved`() {
-        val progress = repo.getInteractiveProgress("khargoosh-va-rahe-jangal")
-        assertNull(progress.currentNodeId)
-    }
-
-    @Test
-    fun `saveInteractiveProgress and getInteractiveProgress round-trip`() {
-        repo.saveInteractiveProgress(InteractiveStoryProgress("khargoosh-va-rahe-jangal", currentNodeId = "n6"))
-        val loaded = repo.getInteractiveProgress("khargoosh-va-rahe-jangal")
-        assertEquals("n6", loaded.currentNodeId)
-    }
-
-    @Test
-    fun `clearInteractiveProgress resets currentNodeId to null`() {
-        repo.saveInteractiveProgress(InteractiveStoryProgress("khargoosh-va-rahe-jangal", currentNodeId = "n6"))
-        repo.clearInteractiveProgress("khargoosh-va-rahe-jangal")
-        assertNull(repo.getInteractiveProgress("khargoosh-va-rahe-jangal").currentNodeId)
     }
 }

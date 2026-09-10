@@ -1,7 +1,6 @@
 package ir.sospans.lalastories.repository
 
 import android.content.Context
-import ir.sospans.lalastories.model.InteractiveStoryProgress
 import ir.sospans.lalastories.model.StoryProgress
 
 class ProgressRepository(context: Context) {
@@ -25,20 +24,5 @@ class ProgressRepository(context: Context) {
 
     fun resetProgress(storyId: String) {
         saveProgress(StoryProgress(storyId))
-    }
-
-    fun getInteractiveProgress(storyId: String): InteractiveStoryProgress = InteractiveStoryProgress(
-        storyId = storyId,
-        currentNodeId = prefs.getString("${storyId}_interactive_node", null)
-    )
-
-    fun saveInteractiveProgress(progress: InteractiveStoryProgress) {
-        prefs.edit()
-            .putString("${progress.storyId}_interactive_node", progress.currentNodeId)
-            .apply()
-    }
-
-    fun clearInteractiveProgress(storyId: String) {
-        prefs.edit().remove("${storyId}_interactive_node").apply()
     }
 }

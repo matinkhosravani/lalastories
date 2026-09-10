@@ -26,11 +26,6 @@
 -keep class ir.sospans.lalastories.model.** { *; }
 -keep class ir.sospans.lalastories.remote.** { *; }
 
-# InteractiveStoryRepository's private raw Gson DTOs (not in model/remote, so not
-# covered by the rules above) - without this, R8 renames/merges their fields and
-# Gson silently fails to populate them, since it matches JSON keys by field name.
--keep class ir.sospans.lalastories.repository.InteractiveStoryRepository$Raw* { *; }
-
 # Coil
 -keep class coil.** { *; }
 
