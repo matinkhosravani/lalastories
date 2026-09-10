@@ -7,8 +7,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -18,10 +17,26 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import ir.sospans.lalastories.R
 import ir.sospans.lalastories.model.CalmSound
+import ir.sospans.lalastories.ui.home.NativeAdCard
+
+private sealed class SoundsGridItem {
+    data class SoundItem(val sound: CalmSound) : SoundsGridItem()
+    object Ad : SoundsGridItem()
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SoundsScreen(sounds: List<CalmSound>, onSoundClick: (CalmSound) -> Unit, onBack: () -> Unit) {
+    var showAd by remember { mutableStateOf(true) }
+
+    val gridItems: List<SoundsGridItem> = buildList {
+        sounds.forEachIndexed { index, sound ->
+            if (index == 2 && showAd) add(SoundsGridItem.Ad)
+            add(SoundsGridItem.SoundItem(sound))
+        }
+        if (sounds.size <= 2 && showAd) add(SoundsGridItem.Ad)
+    }
+
     Scaffold(
         topBar = {
             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
@@ -59,8 +74,22 @@ fun SoundsScreen(sounds: List<CalmSound>, onSoundClick: (CalmSound) -> Unit, onB
             verticalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.padding(padding)
         ) {
-            items(items = sounds, key = { it.id }) { sound ->
-                SoundCard(sound = sound, onClick = { onSoundClick(sound) })
+            items(
+                items = gridItems,
+                key = { item ->
+                    when (item) {
+                        is SoundsGridItem.SoundItem -> item.sound.id
+                        is SoundsGridItem.Ad -> "native_ad"
+                    }
+                }
+            ) { item ->
+                when (item) {
+                    is SoundsGridItem.SoundItem -> SoundCard(
+                        sound = item.sound,
+                        onClick = { onSoundClick(item.sound) }
+                    )
+                    is SoundsGridItem.Ad -> NativeAdCard(onNoAd = { showAd = false })
+                }
             }
         }
     }

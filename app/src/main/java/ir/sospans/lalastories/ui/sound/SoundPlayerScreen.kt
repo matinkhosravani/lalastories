@@ -1,6 +1,7 @@
 package ir.sospans.lalastories.ui.sound
 
 import android.view.ViewGroup
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -47,12 +48,21 @@ fun SoundPlayerScreen(sound: CalmSound, onBack: () -> Unit) {
         onDispose { audioPlayer.release() }
     }
 
+    // Stop playback before leaving so it doesn't bleed under the exit interstitial.
+    val handleBack: () -> Unit = {
+        audioPlayer.pause()
+        isPlaying = false
+        onBack()
+    }
+
+    BackHandler(onBack = handleBack)
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(sound.title) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = handleBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "برگشت")
                     }
                 }

@@ -159,6 +159,9 @@ fun AppNavigation(
             )
         }
         composable(Screen.Sounds.route) {
+            LaunchedEffect(Unit) {
+                Adivery.prepareInterstitialAd(context, INTERSTITIAL_PLACEMENT_ID)
+            }
             SoundsScreen(
                 sounds = soundRepository.loadSounds(),
                 onSoundClick = { sound ->
@@ -175,7 +178,20 @@ fun AppNavigation(
             val sound = soundRepository.loadSounds().first { it.id == soundId }
             SoundPlayerScreen(
                 sound = sound,
-                onBack = { navController.popBackStack() }
+                onBack = {
+                    if (Adivery.isLoaded(INTERSTITIAL_PLACEMENT_ID)) {
+                        Adivery.addPlacementListener(INTERSTITIAL_PLACEMENT_ID, object : AdiveryListener() {
+                            override fun onInterstitialAdClosed(placementId: String) {
+                                Adivery.removePlacementListener(INTERSTITIAL_PLACEMENT_ID)
+                                Adivery.prepareInterstitialAd(context, INTERSTITIAL_PLACEMENT_ID)
+                                navController.popBackStack()
+                            }
+                        })
+                        Adivery.showAd(INTERSTITIAL_PLACEMENT_ID)
+                    } else {
+                        navController.popBackStack()
+                    }
+                }
             )
         }
     }
