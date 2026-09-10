@@ -13,6 +13,7 @@ import com.adivery.sdk.AdiveryListener
 import ir.sospans.lalastories.repository.LullabyRepository
 import ir.sospans.lalastories.repository.PoemRepository
 import ir.sospans.lalastories.repository.ProgressRepository
+import ir.sospans.lalastories.repository.SoundRepository
 import ir.sospans.lalastories.repository.StoryRepository
 import ir.sospans.lalastories.ui.detail.StoryDetailScreen
 import ir.sospans.lalastories.ui.home.HomeScreen
@@ -21,6 +22,8 @@ import ir.sospans.lalastories.ui.lullabies.LullabiesScreen
 import ir.sospans.lalastories.ui.lullaby.LullabyPlayerScreen
 import ir.sospans.lalastories.ui.poems.PoemsScreen
 import ir.sospans.lalastories.ui.reading.ReadingScreen
+import ir.sospans.lalastories.ui.sound.SoundPlayerScreen
+import ir.sospans.lalastories.ui.sounds.SoundsScreen
 import ir.sospans.lalastories.ui.stories.StoriesScreen
 
 private const val INTERSTITIAL_PLACEMENT_ID = "e3d7931e-195b-4ee7-b621-e3b1dbd0a569"
@@ -42,6 +45,10 @@ sealed class Screen(val route: String) {
     object LullabyPlayer : Screen("lullabyPlayer/{lullabyId}") {
         fun createRoute(lullabyId: String) = "lullabyPlayer/$lullabyId"
     }
+    object Sounds : Screen("sounds")
+    object SoundPlayer : Screen("soundPlayer/{soundId}") {
+        fun createRoute(soundId: String) = "soundPlayer/$soundId"
+    }
 }
 
 @Composable
@@ -49,6 +56,7 @@ fun AppNavigation(
     storyRepository: StoryRepository,
     poemRepository: PoemRepository,
     lullabyRepository: LullabyRepository,
+    soundRepository: SoundRepository,
     progressRepository: ProgressRepository
 ) {
     val navController = rememberNavController()
@@ -58,7 +66,8 @@ fun AppNavigation(
             HomeScreen(
                 onStoriesClick = { navController.navigate(Screen.Stories.route) },
                 onPoemsClick = { navController.navigate(Screen.Poems.route) },
-                onLullabiesClick = { navController.navigate(Screen.Lullabies.route) }
+                onLullabiesClick = { navController.navigate(Screen.Lullabies.route) },
+                onSoundsClick = { navController.navigate(Screen.Sounds.route) }
             )
         }
         composable(Screen.Stories.route) {
@@ -146,6 +155,26 @@ fun AppNavigation(
                 lullabies = lullabyRepository.loadLullabies(),
                 lullabyRepository = lullabyRepository,
                 startLullabyId = lullabyId,
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.Sounds.route) {
+            SoundsScreen(
+                sounds = soundRepository.loadSounds(),
+                onSoundClick = { sound ->
+                    navController.navigate(Screen.SoundPlayer.createRoute(sound.id))
+                },
+                onBack = { navController.popBackStack() }
+            )
+        }
+        composable(
+            Screen.SoundPlayer.route,
+            arguments = listOf(navArgument("soundId") { type = NavType.StringType })
+        ) { backStack ->
+            val soundId = backStack.arguments?.getString("soundId")!!
+            val sound = soundRepository.loadSounds().first { it.id == soundId }
+            SoundPlayerScreen(
+                sound = sound,
                 onBack = { navController.popBackStack() }
             )
         }

@@ -36,6 +36,10 @@ class AudioPlayer {
         mediaPlayer?.seekTo(positionMs.toInt())
     }
 
+    fun setLooping(looping: Boolean) {
+        mediaPlayer?.isLooping = looping
+    }
+
     fun setOnCompletionListener(listener: () -> Unit) {
         mediaPlayer?.setOnCompletionListener { listener() }
     }

@@ -4,11 +4,11 @@ import androidx.compose.runtime.Composable
 import ir.sospans.lalastories.R
 
 @Composable
-fun LullabiesEntryCard(onClick: () -> Unit) {
+fun SoundsEntryCard(onClick: () -> Unit) {
     SectionEntryCard(
-        imageRes = R.drawable.home_lullaby,
+        imageRes = R.drawable.home_sounds,
         aspectRatio = 600f / 799f,
-        contentDescription = "لالایی‌ها",
+        contentDescription = "صداهای آرام‌بخش",
         onClick = onClick
     )
 }

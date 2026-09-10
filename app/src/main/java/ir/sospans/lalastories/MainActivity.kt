@@ -13,6 +13,7 @@ import ir.sospans.lalastories.remote.ManifestClient
 import ir.sospans.lalastories.repository.LullabyRepository
 import ir.sospans.lalastories.repository.PoemRepository
 import ir.sospans.lalastories.repository.ProgressRepository
+import ir.sospans.lalastories.repository.SoundRepository
 import ir.sospans.lalastories.repository.StoryRepository
 import ir.sospans.lalastories.ui.theme.KidStoriesTheme
 import kotlinx.coroutines.Dispatchers
@@ -43,6 +44,9 @@ class MainActivity : ComponentActivity() {
         val lullabiesDir = File(getExternalFilesDir(null), "lullabies")
         copyBundledLullabiesIfNeeded(lullabiesDir)
 
+        val soundsDir = File(getExternalFilesDir(null), "sounds")
+        copyBundledSoundsIfNeeded(soundsDir)
+
         val remoteRootDir = File(getExternalFilesDir(null), "remote-cache")
         val manifestClient = ManifestClient(remoteRootDir)
         val cacheIndex = ContentCacheIndex(File(remoteRootDir, "cache-index.json"))
@@ -57,6 +61,7 @@ class MainActivity : ComponentActivity() {
         val lullabyRepository = LullabyRepository(
             lullabiesDir, File(remoteRootDir, "lullabies"), manifestClient, cacheIndex, contentDownloader
         )
+        val soundRepository = SoundRepository(soundsDir)
         val progressRepository = ProgressRepository(this)
 
         // Refresh the 3 static manifests in the background on every launch. Failure (offline,
@@ -78,6 +83,7 @@ class MainActivity : ComponentActivity() {
                     storyRepository = storyRepository,
                     poemRepository = poemRepository,
                     lullabyRepository = lullabyRepository,
+                    soundRepository = soundRepository,
                     progressRepository = progressRepository
                 )
             }
@@ -108,6 +114,15 @@ class MainActivity : ComponentActivity() {
         lullabiesDir.deleteRecursively()
         copyAssetDir("lullabies", lullabiesDir)
         prefs.edit().putBoolean("lullabies_copied_v2", true).apply()
+    }
+
+    private fun copyBundledSoundsIfNeeded(soundsDir: File) {
+        val prefs = getSharedPreferences("app_state", MODE_PRIVATE)
+        if (prefs.getBoolean("sounds_copied_v1", false)) return
+
+        soundsDir.deleteRecursively()
+        copyAssetDir("sounds", soundsDir)
+        prefs.edit().putBoolean("sounds_copied_v1", true).apply()
     }
 
     private fun copyAssetDir(assetPath: String, destDir: File) {

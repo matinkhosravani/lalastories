@@ -50,9 +50,9 @@ class StoryRepositoryTest {
     }
 
     @Test
-    fun `loadStories sets audioPath when audio mp3 exists`() {
+    fun `loadStories sets audioPath when voice mp3 exists`() {
         val storyDir = File(storiesDir, "cinderella")
-        storyDir.resolve("audio.mp3").createNewFile()
+        storyDir.resolve("voice.mp3").createNewFile()
         val repo = StoryRepository(storiesDir)
         val stories = repo.loadStories()
         assertNotNull(stories[0].audioPath)

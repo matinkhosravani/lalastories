@@ -34,7 +34,8 @@ private const val BANNER_PLACEMENT_ID = "aa78c7e1-292a-40fa-973a-6abb2fa7e6db"
 fun HomeScreen(
     onStoriesClick: () -> Unit,
     onPoemsClick: () -> Unit,
-    onLullabiesClick: () -> Unit
+    onLullabiesClick: () -> Unit,
+    onSoundsClick: () -> Unit
 ) {
     Scaffold(
         bottomBar = {
@@ -89,8 +90,18 @@ fun HomeScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Box(modifier = Modifier.padding(horizontal = 16.dp)) {
-                LullabiesEntryCard(onClick = onLullabiesClick)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Box(modifier = Modifier.weight(1f)) {
+                    SoundsEntryCard(onClick = onSoundsClick)
+                }
+                Box(modifier = Modifier.weight(1f)) {
+                    LullabiesEntryCard(onClick = onLullabiesClick)
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
