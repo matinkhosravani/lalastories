@@ -8,7 +8,7 @@ import ir.sospans.lalastories.R
 fun SoundsEntryCard(onClick: () -> Unit) {
     SectionEntryCard(
         imageRes = R.drawable.home_sounds,
-        aspectRatio = 700f / 1003f,
+        aspectRatio = 2f / 3f,
         contentDescription = "صداهای آرام‌بخش",
         onClick = onClick,
         contentScale = ContentScale.Fit

@@ -8,7 +8,7 @@ import ir.sospans.lalastories.R
 fun LullabiesEntryCard(onClick: () -> Unit) {
     SectionEntryCard(
         imageRes = R.drawable.home_lullaby,
-        aspectRatio = 700f / 1003f,
+        aspectRatio = 2f / 3f,
         contentDescription = "لالایی‌ها",
         onClick = onClick,
         contentScale = ContentScale.Fit
