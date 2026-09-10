@@ -19,7 +19,8 @@ fun SectionEntryCard(
     imageRes: Int,
     aspectRatio: Float,
     contentDescription: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    contentScale: ContentScale = ContentScale.Crop
 ) {
     Card(
         modifier = Modifier
@@ -33,7 +34,7 @@ fun SectionEntryCard(
             painter = painterResource(id = imageRes),
             contentDescription = contentDescription,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            contentScale = contentScale
         )
     }
 }
